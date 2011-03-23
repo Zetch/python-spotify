@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-import os.path
+import os.path, sys
+
 
 def read(filename):
-    return open(os.path.join(os.path.dirname(__file__), filename)).read()
+    return open(os.path.join(sys.path[0], filename)).read()
 
 
 VERSION     = '0.1'

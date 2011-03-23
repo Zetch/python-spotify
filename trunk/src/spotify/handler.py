@@ -12,18 +12,14 @@ import hashlib
 from gobject import MainLoop
 from dbus.mainloop.glib import DBusGMainLoop
 from re import compile
+from spotify.notification import SpotifyNotifier
 
-DBUS_SPOTIFY_BUS = 'com.spotify.qt'
-DBUS_PROPERTY_IFACE = 'org.freedesktop.DBus.Properties'
-DBUS_MEDIAPLAYER_IFACE = 'org.freedesktop.MediaPlayer2'
-DBUS_NOTIFICATION_BUS = 'org.freedesktop.Notifications'
-DBUS_NOTIFICATION_IFACE = 'org.freedesktop.Notifications'
-DBUS_NOTIFICATION_PATH = '/org/freedesktop/Notifications'
-DBUS_GNOME_SETTINGS = ''
-DBUS_MEDIAKEYS_PATH = ''
-
-DEFAULT_SPOTIFY_ICON = '/usr/share/pixmaps/spotify.png'
-CACHE_DIR = os.path.join(os.environ['HOME'], '.cache/spotify/Covers/')
+from spotify.settings import \
+	DBUS_SPOTIFY_BUS, \
+	DBUS_MEDIAPLAYER_IFACE, \
+	DBUS_PROPERTY_IFACE, \
+	CACHE_DIR, \
+	DEFAULT_SPOTIFY_ICON
 
 
 class SpotifyHandler(object):
@@ -39,6 +35,7 @@ class SpotifyHandler(object):
 		self.__cover_pattern = compile("""<img class\=\"limit\-width\" src\=\"(.*)\" alt""")
 		self.__thumb_pattern = compile("<meta property=\"og\:image\" content\=\"(.*)\" \/>")
 
+	
 	def __catch_except(function):
 		'''
 		Decorator for catching exception in common MPRIS2 methods
@@ -53,6 +50,7 @@ class SpotifyHandler(object):
 				return False
 		return inner
 
+	
 	def __omit_optparse(function):
 		'''
 		Decorator to omit optional args in callback action if method
@@ -62,6 +60,7 @@ class SpotifyHandler(object):
 			function(args[0])
 		return inner
 
+	
 	def __filter_optparse(function):
 		'''
 		Decorator to filter optional args in callback action if method
@@ -249,6 +248,9 @@ class SpotifyHandler(object):
 					print "Couldn't get URL image from web...", e
 			return DEFAULT_SPOTIFY_ICON
 		return filename
+	
+	def launch_notification(self):
+		pass
 
 
 class SpotifyListener(object):
@@ -271,61 +273,3 @@ class SpotifyListener(object):
 
 	def on_track_changed(self):
 		pass
-
-
-class SpotifyNotifier(object):
-
-	def __init__(self, bus=dbus.SessionBus()):
-		try:
-			self.__bus = bus.get_object(DBUS_NOTIFICATION_BUS, DBUS_NOTIFICATION_PATH)
-			self.notifier = dbus.Interface(self.__bus, DBUS_NOTIFICATION_IFACE)
-		except Exception, e:
-			print "Notification Daemon not running!"
-
-	def notify(self, title, body, timeout, icon=DEFAULT_SPOTIFY_ICON):
-		'''
-		Displays a notification with given args:
-			title: Bold type title
-			body: A description text, accepts new-line character
-			timeout: Time to display notification
-			icon: Path to icon file
-		'''
-		app_name = "Spotify Notification"
-		notification_id = 0
-		actions = ()
-		hints = {}
-		try:
-			return self.notifier.Notify(app_name, notification_id, icon, title, body, actions, hints, timeout)
-		except Exception, e:
-			print "There was an error: ", e
-		return 0
-
-	def close_notification(self, notification_id):
-		'''
-		Close given ID notification if it is displaying
-		'''
-		try:
-			self.notifier.Close(notification_id)
-			return True
-		except:
-			pass
-		return False
-
-
-class MediaKeyHandler(object):
-
-	def __init__(self, spotify_handler, bus=dbus.SessionBus()):
-		self.spotify = spotify_handler
-		self.__bus   = bus
-		self.handler = self.__bus.get_object(DBUS_GNOME_SETTINGS, DBUS_MEDIAKEYS_PATH)
-		self.handler.GrabMediaPlayerKeys("Spotify", 0, dbus_interface=DBUS_MEDIAKEYS_IFACE)
-		self.handler.connect_to_signal('MediaPlayerKeyPressed', self.on_pressed_key)
-
-	def on_pressed_key(self, *keys):
-		for key in keys:
-			if key == 'Play': self.spotify.play()
-			elif key == 'Stop': self.spotify.stop()
-			elif key == 'Next': self.spotify.next()
-			elif key == 'Previous': self.spotify.previous()
-			elif key == 'Pause': self.spotify.play_pause()
-		#

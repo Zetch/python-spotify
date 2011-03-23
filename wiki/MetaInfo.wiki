@@ -1,0 +1,30 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Add your content here.
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
+
+
+= Meta Parameters =
+
+ * *title* Song title
+ * *album* Album name
+ * *artist* Artist name
+ * *track* Track number from album
+ * *uri* Spotify URI _spotify:track:hash_
+ * *created* Creation date
+ * *disc* Disc number (if album has many)
+ * *length* Song length in milisecs
+ * *trackid* Same as _uri_
+ * *formatlength* Song length as 'mm:ss' string
+ * *url* Track url on Spotify web
+ * *coverurl* Cover image url on Spotify web (45x45)
+ * *coverurl_thumb* Cover thumb image url on Spotify web (90x90)

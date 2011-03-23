@@ -5,7 +5,7 @@
 # Author: Nauzet Hernandez (nauzethc@gmail.com)
 # *********************************************************************** #
 
-from spotify import SpotifyHandler
+from spotify.handler import SpotifyHandler 
 from optparse import OptionParser
 
 

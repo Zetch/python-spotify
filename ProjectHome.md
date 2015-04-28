@@ -1,0 +1,1 @@
+Set of tools for controlling and get information from Spotify for Linux (Native)
